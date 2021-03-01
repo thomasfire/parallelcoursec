@@ -33,15 +33,15 @@
 
 #define M1MAPF(arr, i, tt) do {tt buff = arr[i] / M_PI; arr[i] = (buff*buff);} while(0)
 
-#define M2MAPF(arr, i, tt) do {tt buff = SIN((arr[i] + (i > 0?arr[i-1]:0)));arr[i] = ABS(buff);} while (0)
+#define M2MAPF(arr1, arr2, tt, i) do {tt buff = SIN((arr1[i] + (arr2[i])));arr1[i] = ABS(buff);} while (0)
 
-#define MERGEF(arr1, arr2, i) do {arr2[i] = pow(arr1[i], arr2[i]);} while(0)
+#define MERGEF(arr1, arr2, tt, i) do {arr2[i] = pow(arr1[i], arr2[i]);} while(0)
 
 #define RESTRICT_RAND(val, minv, maxv) (val % (maxv + 1 - minv) + minv)
 
 #define FILL_ARRAY(arr, n, seed) do{for (size_t _q=0;_q<n;_q++){arr[_q] = RESTRICT_RAND(rand_r(&seed), 1, A);}}while(0)
 #define MAP_ARR(arr, n, tt, func) do{for (size_t _q=0;_q<n;_q++)func(arr, _q, tt);}while(0)
-#define MERGE_ARR(arr1, arr2, n, func) do{for (size_t _q=0;_q<n;_q++)func(arr1, arr2, _q);}while(0)
+#define MERGE_ARR(arr1, arr2, n, tt, func) do{for (size_t _q=0;_q<n;_q++)func(arr1, arr2, tt, _q);}while(0)
 
 #define STORE_MIN_VAL(storage, arr, n, maxv) do{storage=maxv; for (size_t _q=0;_q<n;_q++)if (arr[_q] != 0 && arr[_q] < storage)storage = arr[_q];}while(0)
 
@@ -71,21 +71,27 @@ int main(int argc, const char *argv[]) {
         unsigned copy = si;
         size_t N_2 = N / 2;
         double *M1 = malloc(N * sizeof(double));
-        double *M2 = malloc((N / 2) * sizeof(double));
+        double *M2 = malloc((N_2) * sizeof(double));
+        double *M2CP = malloc((N_2 + 1) * sizeof(double));
+        M2CP[0] = 0;
 
         FILL_ARRAY(M1, N, copy);
         copy = si;
         FILL_ARRAY(M2, N_2, copy);
+        memcpy((M2CP + 1), M2, N_2);
 
         MAP_ARR(M1, N, double, M1MAPF);
-        MAP_ARR(M2, N_2, double, M2MAPF);
+        MERGE_ARR(M2, M2CP, N_2, double, M2MAPF);
 
-        MERGE_ARR(M1, M2, N_2, MERGEF);
+        MERGE_ARR(M1, M2, N_2, double, MERGEF);
 
         GNOMESORT(M2, N_2, double);
         double result = 0;
         REDUCEARR(result, M2, N_2, double, DBL_MAX);
         printf("Experiment %u/%u result: %f\n", si + 1, EXPERIMENTS, result);
+        free(M1);
+        free(M2);
+        free(M2CP);
     }
 
     gettimeofday(&T2, NULL);
