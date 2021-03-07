@@ -130,7 +130,8 @@ int main(int argc, const char *argv[]) {
 
     gettimeofday(&T2, NULL);
     delta_ms = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
-    printf("Result: %f", full_result);
-    printf("\nN=%zu. Milliseconds passed: %ld\n", N, delta_ms);
+    // printf("Result: %f", full_result);
+    // printf("\nN=%zu. Milliseconds passed: %ld\n", N, delta_ms);
+    printf("%zu,%ld,%f\n", N, delta_ms, full_result);
     return 0;
 }
