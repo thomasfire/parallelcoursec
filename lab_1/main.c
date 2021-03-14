@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
 #include <sys/time.h>
-#include <float.h>
+
+#define DBL_MAX 1.79769e+308
 
 // Var = 1 + (6 * 4 * 13) % (7,8,6,7) = 1 + 312 % (7,8,6,7)
 // Map M1 - 5 - (M1[i] / PI) ^ 3
@@ -13,6 +13,7 @@
 
 #define EXPERIMENTS 50
 #define A 312
+#define A10 3120
 
 #define SWAP(x, y, tt) do { \
     tt buff = x;            \
@@ -40,18 +41,20 @@
     arr[i] = (buff*buff*buff);           \
 } while(0)
 
-#define M2MAPF(arr1, arr2, tt, i) do { \
-    tt buff = SIN((arr1[i] + (arr2[i]))); \
-    arr1[i] = ABS(buff);                   \
+static double previous = 0;
+#define M2MAPF(arr1, i, tt) do { \
+    tt buff = SIN((arr1[i] + previous)); \
+    previous = arr1[i];          \
+    arr1[i] = ABS(buff);         \
 } while (0)
 
 #define MERGEF(arr1, arr2, tt, i) do {arr2[i] = pow(arr1[i], arr2[i]);} while(0)
 
 #define RESTRICT_RAND(val, minv, maxv) (val % (maxv + 1 - minv) + minv)
 
-#define FILL_ARRAY(arr, n, seed) do{ \
+#define FILL_ARRAY(arr, n, seed, minv, maxv) do{ \
     for (size_t _q = 0; _q < n; _q++)          \
-        {arr[_q] = RESTRICT_RAND(rand_r(&seed), 1, A);} \
+        {arr[_q] = RESTRICT_RAND(rand_r(&seed), minv, maxv);} \
 }while(0)
 
 #define MAP_ARR(arr, n, tt, func) do{ \
@@ -103,18 +106,16 @@ int main(int argc, const char *argv[]) {
         srand(si);
         unsigned copy = si;
         size_t N_2 = N / 2;
+        previous = 0;
         double *M1 = malloc(N * sizeof(double));
         double *M2 = malloc((N_2) * sizeof(double));
-        double *M2CP = malloc((N_2 + 1) * sizeof(double));
-        M2CP[0] = 0;
 
-        FILL_ARRAY(M1, N, copy);
+        FILL_ARRAY(M1, N, copy, 1, A);
         copy = si;
-        FILL_ARRAY(M2, N_2, copy);
-        memcpy((M2CP + 1), M2, N_2);
+        FILL_ARRAY(M2, N_2, copy, A, A10);
 
         MAP_ARR(M1, N, double, M1MAPF);
-        MERGE_ARR(M2, M2CP, N_2, double, M2MAPF);
+        MAP_ARR(M2, N_2, double, M2MAPF);
 
         MERGE_ARR(M1, M2, N_2, double, MERGEF);
 
@@ -125,7 +126,6 @@ int main(int argc, const char *argv[]) {
         // printf("Experiment %u/%u result: %f\n", si + 1, EXPERIMENTS, result);
         free(M1);
         free(M2);
-        free(M2CP);
     }
 
     gettimeofday(&T2, NULL);
