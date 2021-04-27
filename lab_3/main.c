@@ -105,7 +105,7 @@ int main(int argc, const char *argv[]) {
 
 
     // schedule(static, 2)
-#pragma omp parallel for default(none) private(previous) shared(N) reduction(+:full_result) num_threads(TN) schedule(guided, 16)
+#pragma omp parallel for default(none) private(previous) shared(N) reduction(+:full_result) num_threads(TN)
     for (unsigned si = 0; si < EXPERIMENTS; si++) {
         srand(si);
         unsigned copy = si;
