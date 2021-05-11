@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <sys/time.h>
+
+#ifndef NOSTATUS
 #include <unistd.h>
 #include <pthread.h>
+#endif
 
 #define DBL_MAX 1.79769e+308
 
@@ -24,7 +27,10 @@
 // Merge -  1 - M1[i] ^ M2[i]
 // Sort  -  5 - Gnome Sort
 
+#ifndef EXPERIMENTS
 #define EXPERIMENTS 50
+#endif
+
 #define A 312
 #define A10 3120
 
@@ -112,15 +118,17 @@ static double previous = 0;
 } while (0)
 
 
+#ifndef NOSTATUS
 static void *state_notifyer(void *data) {
     unsigned *si = (unsigned *) data;
 
     while (*si < EXPERIMENTS) {
-        printf("Status: %u%%\n", (*si) * 2);
+        printf("Status: %u%%\n", (unsigned)((*si) * (100.0 / (double) EXPERIMENTS)));
         sleep(1);
     }
     return NULL;
 }
+#endif
 
 int main(int argc, const char *argv[]) {
     if (argc != 3) {
